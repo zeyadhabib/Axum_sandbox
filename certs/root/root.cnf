@@ -1,0 +1,18 @@
+[req]
+distinguished_name = dname
+x509_extensions = cert_ext
+prompt = no
+
+[ dname ]
+CN = RootCA
+C = IE
+ST = Dublin
+L = Dublin
+O = ZORG
+OU = ZSEC
+emailAddress = zeyadhabib@fake.com
+
+[ cert_ext ]
+basicConstraints = CA:TRUE, pathlen:0
+keyUsage = keyCertSign, cRLSign
+subjectKeyIdentifier=hash

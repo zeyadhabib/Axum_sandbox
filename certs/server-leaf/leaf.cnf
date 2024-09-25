@@ -1,0 +1,28 @@
+[req]
+distinguished_name = dname
+req_extensions = req_ext
+prompt = no
+
+[ dname ]
+CN = zeyadhabibserver.com
+C = IE
+ST = Dublin
+L = Dublin
+O = ZSEC
+OU = ZORGSERV
+emailAddress = zeyadhabibserv@fake.com
+
+[ req_ext ]
+basicConstraints = CA:FALSE
+keyUsage = digitalSignature, nonRepudiation
+extendedKeyUsage = serverAuth, clientAuth
+subjectKeyIdentifier=hash
+subjectAltName = @sans
+certificatePolicies= 1.2.4.5.6.7
+authorityInfoAccess = OCSP;URI:http://ocsp.myCA/
+authorityInfoAccess = caIssuers;URI:http://myCA/ca.cer
+
+[sans]
+DNS.1 = zeyad.server.com
+DNS.2 = zeyad.habib.server.com
+IP.1 = 127.0.0.1
