@@ -7,6 +7,9 @@ edition = "2021"
 async-trait = "0.1.83"
 axum = "0.7.6"
 axum-server = { version = "0.7.1", features = ["openssl", "tls-openssl", "tls-rustls"] }
+bcrypt = "0.15.1"
+chrono = { version = "0.4.38", features = ["serde"] }
+jsonwebtoken = "9.3.0"
 openssl = "0.10.66"
 rustls = "0.23.13"
 serde = { version = "1.0.210", features = ["derive"] }

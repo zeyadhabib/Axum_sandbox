@@ -1,4 +1,5 @@
 pub mod types;
+pub mod jwt_token_helpers;
 
 use std::{error::Error, net::SocketAddr, path::PathBuf, sync::Arc};
 
