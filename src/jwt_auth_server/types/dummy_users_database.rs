@@ -1,3 +1,5 @@
+use axum::http::StatusCode;
+
 use super::{Email, InternalUser, NewUserRequest, User, UsersDataBase};
 use std::{
     collections::HashMap,
@@ -18,7 +20,7 @@ impl UsersDataBase for DummyUserDataBase {
         })
     }
 
-    async fn add_user(&self, user: NewUserRequest) -> Result<User, axum::http::Error> {
+    async fn add_user(&self, user: NewUserRequest) -> Result<User, StatusCode> {
         let internal_user = InternalUser {
             uuid: self.store.read().unwrap().len() as u64,
             first_name: user.first_name,

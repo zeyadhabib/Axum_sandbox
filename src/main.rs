@@ -11,12 +11,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
     });
 
     let handle_2 = tokio::spawn(async move {
-        let error = jwt_auth_server::start_login_server().await.unwrap_err();
+        let error = jwt_auth_server::start_server().await.unwrap_err();
         println!("{error}");
     });
 
-    // let handle2 = tokio::spawn(async mode {
-    // });
     handle.await?;
     handle_2.await?;
     Ok(())

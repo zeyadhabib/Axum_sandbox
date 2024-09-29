@@ -2,7 +2,7 @@ pub mod dummy_users_database;
 
 use std::sync::Arc;
 
-use axum::http::Error;
+use axum::http::StatusCode;
 use serde::{Deserialize, Serialize};
 
 pub type Email = String;
@@ -36,7 +36,7 @@ pub struct User {
 pub trait UsersDataBase {
     async fn get_user (&self, email: String) -> Option<User>;
     async fn delete_user (&self, user: User) -> Option<User>;
-    async fn add_user (&self, user: NewUserRequest) -> Result<User, Error>;
+    async fn add_user (&self, user: NewUserRequest) -> Result<User, StatusCode>;
 }
 
 #[derive(Clone)]

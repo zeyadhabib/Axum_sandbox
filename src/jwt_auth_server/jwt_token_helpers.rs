@@ -20,6 +20,7 @@ pub trait IJwtTokenHelper {
     async fn decode_jwt(&self, jwt_token: String) -> Result<TokenData<Claims>, StatusCode>;
 }
 
+#[derive(Default)]
 pub struct JwtTokenHelper {}
 
 #[async_trait::async_trait]
