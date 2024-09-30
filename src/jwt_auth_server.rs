@@ -15,6 +15,7 @@ use axum_server::tls_openssl::OpenSSLConfig;
 use jwt_token_helpers::IJwtTokenHelper;
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 use serde_json::json;
+
 use types::{dummy_users_database::DummyUserDataBase, AppState, NewUserRequest, User};
 
 async fn sign_up(
