@@ -6,7 +6,7 @@ use std::{error::Error, net::SocketAddr, path::PathBuf, sync::Arc};
 use axum::{
     body::Body,
     extract::{Query, Request, State},
-    http::{header::AUTHORIZATION, Response, StatusCode},
+    http::{header::AUTHORIZATION, HeaderMap, HeaderValue, Response, StatusCode},
     middleware::{from_fn, Next},
     routing::get,
     Json, Router,
@@ -14,6 +14,8 @@ use axum::{
 use axum_server::tls_openssl::OpenSSLConfig;
 use jwt_token_helpers::IJwtTokenHelper;
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
+use serde_json::json;
+
 use types::{dummy_users_database::DummyUserDataBase, AppState, NewUserRequest, User};
 
 async fn sign_up(
@@ -31,9 +33,13 @@ async fn sign_in(
     let handle = data_base_handle.handle;
     if let Some(found_user) = handle.get_user(user.email.clone()).await {
         if user.password == found_user.password {
+            let email = found_user.email.clone();
+            let mut claims = json!({
+                "email": email
+            });
             let token_generator = jwt_token_helpers::JwtTokenHelper::default();
             token_generator
-                .encode_jwt(user.email.clone())
+                .encode_jwt(&mut claims)
                 .await
                 .map(|token| Json(token))
         } else {
@@ -45,19 +51,28 @@ async fn sign_in(
 }
 
 async fn delete_user(
+    headers: HeaderMap,
     State(data_base_handle): State<AppState>,
     Query(user): Query<User>,
 ) -> StatusCode {
-    let handle = data_base_handle.handle;
-    if let Some(found_user) = handle.get_user(user.email.clone()).await {
-        if user.password == found_user.password {
-            handle.delete_user(user).await;
-            StatusCode::OK
-        } else {
-            StatusCode::UNAUTHORIZED
-        }
-    } else {
-        StatusCode::UNAUTHORIZED
+    match headers.get("email").map(|value| value.to_str()) {
+        Some(Ok(requesting_email)) => match requesting_email == &user.email {
+            true => {
+                let handle = data_base_handle.handle;
+                if let Some(found_user) = handle.get_user(user.email.clone()).await {
+                    if user.password == found_user.password {
+                        handle.delete_user(user).await;
+                        StatusCode::OK
+                    } else {
+                        StatusCode::UNAUTHORIZED
+                    }
+                } else {
+                    StatusCode::UNAUTHORIZED
+                }
+            },
+            false => StatusCode::UNAUTHORIZED
+        },
+        _ => StatusCode::UNAUTHORIZED,
     }
 }
 
@@ -74,13 +89,22 @@ pub async fn authorize(mut req: Request, next: Next) -> Result<Response<Body>, S
     let (_bearer, token) = (header.next(), header.next());
     let token_generator = jwt_token_helpers::JwtTokenHelper::default();
 
-    let token_data = match token_generator.decode_jwt(token.unwrap().to_string()).await {
-        Ok(data) => data,
+    let claims = match token_generator.decode_jwt(token.unwrap().to_string()).await {
+        Ok(data) => data.claims,
         Err(_) => return Err(StatusCode::UNAUTHORIZED),
     };
 
-    req.extensions_mut().insert(token_data.claims.email.clone());
-    Ok(next.run(req).await)
+    match claims.get("email").map(|value| value.as_str()) {
+        Some(Some(email)) => {
+            let res = req
+                .headers_mut()
+                .insert("email", HeaderValue::from_str(email).unwrap());
+            println!("{res:?}");
+            println!("{:?}", req.headers());
+            Ok(next.run(req).await)
+        }
+        _ => Err(StatusCode::UNAUTHORIZED),
+    }
 }
 
 pub async fn start_server() -> Result<(), Box<dyn Error>> {
@@ -90,7 +114,6 @@ pub async fn start_server() -> Result<(), Box<dyn Error>> {
     let unprotected_routes = Router::new()
         .route("/sign-up", get(sign_up))
         .route("/sign-in", get(sign_in))
-        // .route("/remove-user", get(delete_user))
         .with_state(app_state.clone());
 
     let protected_routes = Router::new().nest(
