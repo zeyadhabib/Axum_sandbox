@@ -7,36 +7,53 @@ use serde::{Deserialize, Serialize};
 
 pub type Email = String;
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct NewUserRequest {
+#[derive(Deserialize, Clone, Debug)]
+pub struct SignUpRequest {
+    pub email: String,
     pub first_name: String,
     pub middle_name: Option<String>,
     pub last_name: String,
+    pub password: String
+}
+
+#[derive(Deserialize, Clone, Debug)]
+pub struct LoginRequest {
     pub email: String,
+    pub password: String 
+}
+
+pub type DeleteUserRequest = LoginRequest;
+
+#[allow(dead_code)]
+#[derive(Deserialize, Clone, Debug)]
+pub struct InternalStoredUser {
+    pub uuid: u128,
+    pub email: String,
+    pub first_name: String,
+    pub middle_name: Option<String>,
+    pub last_name: String,
     pub password: String
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct InternalUser {
-    pub uuid: u64,
-    pub first_name: String,
-    pub middle_name: Option<String>,
-    pub last_name: String,
-    pub email: String,
-    pub password: String
+pub struct UserResponse {
+    pub uuid: u128,
+    pub email: String
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct User {
+#[allow(dead_code)]
+#[derive(Deserialize, Clone, Debug)]
+pub struct UserDataBaseResponse {
+    pub uuid: u128,
     pub email: String,
     pub password: String
 }
 
 #[async_trait::async_trait]
 pub trait UsersDataBase {
-    async fn get_user (&self, email: String) -> Option<User>;
-    async fn delete_user (&self, user: User) -> Option<User>;
-    async fn add_user (&self, user: NewUserRequest) -> Result<User, StatusCode>;
+    async fn get_user (&self, user: LoginRequest) -> Result<UserDataBaseResponse, StatusCode>;
+    async fn delete_user (&self, user: DeleteUserRequest) -> Result<UserResponse, StatusCode>;
+    async fn add_user (&self, user: SignUpRequest) -> Result<UserResponse, StatusCode>;
 }
 
 #[derive(Clone)]
