@@ -1,7 +1,7 @@
 use axum::http::StatusCode;
 
 use super::{
-    DeleteUserRequest, Email, InternalStoredUser, LoginRequest, SignUpRequest, UserDataBaseResponse, UserResponse, UsersDataBase
+    DeleteUserRequest, InternalStoredUser, LoginRequest, SignUpRequest, UserDataBaseResponse, UserResponse, UsersDataBase
 };
 use std::{
     collections::HashMap,
@@ -10,7 +10,7 @@ use std::{
 
 #[derive(Default, Clone)]
 pub struct DummyUserDataBase {
-    store: Arc<RwLock<HashMap<Email, InternalStoredUser>>>,
+    store: Arc<RwLock<HashMap<String, InternalStoredUser>>>,
 }
 
 #[async_trait::async_trait]

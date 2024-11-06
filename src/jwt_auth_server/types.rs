@@ -5,8 +5,6 @@ use std::sync::Arc;
 use axum::http::StatusCode;
 use serde::{Deserialize, Serialize};
 
-pub type Email = String;
-
 #[derive(Deserialize, Clone, Debug)]
 pub struct SignUpRequest {
     pub email: String,
@@ -22,7 +20,20 @@ pub struct LoginRequest {
     pub password: String 
 }
 
-pub type DeleteUserRequest = LoginRequest;
+#[derive(Deserialize, Clone, Debug)]
+pub struct DeleteUserRequest {
+    pub email: String,
+    pub password: String 
+}
+
+impl Into<LoginRequest> for DeleteUserRequest {
+    fn into(self) -> LoginRequest {
+        LoginRequest {
+            email: self.email,
+            password: self.password
+        }
+    }
+}
 
 #[allow(dead_code)]
 #[derive(Deserialize, Clone, Debug)]
