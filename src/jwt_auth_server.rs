@@ -59,7 +59,7 @@ async fn delete_user(
         Some(Ok(requesting_email)) => match requesting_email == &user.email {
             true => {
                 let handle = data_base_handle.handle;
-                if let Ok(found_user) = handle.get_user(user.clone()).await {
+                if let Ok(found_user) = handle.get_user(user.clone().into()).await {
                     if user.password == found_user.password {
                         if let Ok(user) = handle.delete_user(user).await {
                             Ok(Json(user))
